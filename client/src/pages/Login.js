@@ -23,17 +23,22 @@ const Login = (props) => {
 
   const message = () => {
     return (
-      <div className="flex justify-center items-center flex-col mt-4">
-        <div className="text-base mb-2">
-          New User?{" "}
-          <Link to="/signup" className="text-theme">
-            {" "}
-            Click here
+      <div className="flex flex-col items-center gap-4 mt-6 pt-6 border-t border-white/10">
+        <div className="text-center">
+          <span className="text-text-secondary text-sm">New User? </span>
+          <Link
+            to="/signup"
+            className="text-primary hover:text-primary-light font-semibold text-sm transition-colors duration-200 hover:underline"
+          >
+            Sign Up
           </Link>
         </div>
 
-        <div className="text-base">
-          <Link to="/reset/forgot" className="text-theme">
+        <div className="text-center">
+          <Link
+            to="/reset/forgot"
+            className="text-text-muted hover:text-primary text-sm transition-colors duration-200 hover:underline"
+          >
             Forgot Password?
           </Link>
         </div>

@@ -1,3 +1,13 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCopy,
+  faUsers,
+  faPlay,
+  faSignOutAlt,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
+
 const Lobby = ({
   socket,
   code,
@@ -9,10 +19,16 @@ const Lobby = ({
   setCreated,
   setJoin,
 }) => {
+  const [copied, setCopied] = useState(false);
+
   const copyToClipboard = () => {
-    if ("clipboard" in navigator) navigator.clipboard.writeText(code);
-    else document.execCommand("copy", true, code);
-    alert("Code successfully copied to the clipboard!");
+    if ("clipboard" in navigator) {
+      navigator.clipboard.writeText(code);
+    } else {
+      document.execCommand("copy", true, code);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const start = () => {
@@ -40,61 +56,190 @@ const Lobby = ({
   };
 
   return (
-    <>
-      <div className="glassmorphism min-h-screen flex items-center justify-center text-xl">
-        <div className="mx-auto py-4 px-1 w-[45rem] h-auto rounded-md glassmorphism border-none bg-background-tertiary">
-          <div className="p-1 text-center tracking-[1.5px] m-4 flex flex-col">
-            <div>
-              Share the code{" "}
-              <span>
-                <p
-                  className="cursor-pointer text-theme"
-                  onClick={copyToClipboard}
-                >
-                  {code}
-                </p>
-              </span>{" "}
-              with your friends to join the auction.
-            </div>
-            <div className="mt-4 text-hover">
-              Users joined:{" "}
-              {users.map((user) => {
-                return <div key={user.user}>{user.user}</div>;
-              })}
-            </div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden">
+      {/* Static background with subtle pattern */}
+      <div className="absolute inset-0 bg-background-secondary">
+        {/* Subtle grid pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: "50px 50px",
+          }}
+        ></div>
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/50 via-background-secondary to-slate-800/50"></div>
+      </div>
+
+      <div className="relative z-10 max-w-4xl w-full">
+        {/* Heading Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center mb-4">
+            <FontAwesomeIcon
+              icon={faUsers}
+              className="text-4xl text-primary mr-3"
+            />
+            <h1 className="text-4xl md:text-5xl font-bold">
+              <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                Auction Lobby
+              </span>
+            </h1>
           </div>
-          <div className="flex flex-col items-center justify-center">
-            {main ? (
-              <button
-                className="relative inline-block px-5 py-2 rounded-[30px] transition-transform duration-500 uppercase font-bold overflow-hidden border-none outline-none bg-theme-3 z-10 cursor-pointer before:z-[-1] before:content-[''] before:h-[200%] before:w-[200%] before:absolute before:top-full before:left-[-50%] before:right-0 before:bottom-0 before:rounded-full before:bg-theme before:transition-transform before:duration-500 hover:before:translate-y-[-2.7rem]"
-                onClick={() => {
-                  start();
-                }}
-              >
-                Start
-              </button>
-            ) : (
-              ""
+          <p className="text-text-secondary text-lg">
+            Waiting for players to join. Share the room code below to invite
+            others.
+          </p>
+          <div className="h-1 w-24 bg-gradient-to-r from-primary via-secondary to-accent mx-auto rounded-full mt-4"></div>
+        </div>
+
+        {/* Main Content Card */}
+        <div className="glassmorphism p-8 md:p-10 rounded-2xl border border-white/20 backdrop-blur-xl shadow-2xl">
+          {/* Room Code Section */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-text-primary mb-4 flex items-center">
+              <FontAwesomeIcon icon={faCopy} className="mr-2 text-primary" />
+              Room Code
+            </h2>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 px-6 py-4 bg-background-tertiary/50 border border-white/10 rounded-xl flex items-center justify-between group hover:border-primary/50 transition-all duration-300">
+                <code className="text-2xl md:text-3xl font-mono font-bold text-primary tracking-wider">
+                  {code}
+                </code>
+                <button
+                  onClick={copyToClipboard}
+                  className={`ml-4 px-4 py-2 rounded-lg transition-all duration-300 ${
+                    copied
+                      ? "bg-green-500/20 border border-green-500/50"
+                      : "bg-primary/20 border border-primary/50 hover:bg-primary/30"
+                  }`}
+                >
+                  <FontAwesomeIcon
+                    icon={faCopy}
+                    className={`text-lg ${
+                      copied ? "text-green-400" : "text-primary"
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+            {copied && (
+              <p className="mt-2 text-sm text-green-400 font-medium flex items-center gap-1">
+                <span>✓</span>
+                <span>Code copied to clipboard!</span>
+              </p>
             )}
-            <button
-              className="relative inline-block px-5 py-2 rounded-[30px] transition-transform duration-500 uppercase font-bold overflow-hidden border-none outline-none bg-theme-3 z-10 cursor-pointer before:z-[-1] before:content-[''] before:h-[200%] before:w-[200%] before:absolute before:top-full before:left-[-50%] before:right-0 before:bottom-0 before:rounded-full before:bg-theme before:transition-transform before:duration-500 hover:before:translate-y-[-2.7rem] mt-4"
-              onClick={() => {
-                exit();
-              }}
-            >
-              Exit
-            </button>
-            {error ? (
-              <div className="text-center block bg-red-500/10 text-base mt-3 p-2 rounded-2xl max-w-[22rem]">
-                {error}
+            <p className="mt-3 text-sm text-text-muted">
+              Share this code with your friends so they can join the auction
+              room.
+            </p>
+          </div>
+
+          {/* Users Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-text-primary flex items-center">
+                <FontAwesomeIcon icon={faUsers} className="mr-2 text-primary" />
+                Players Joined
+              </h2>
+              <div className="px-4 py-1.5 bg-primary/20 border border-primary/50 rounded-full">
+                <span className="text-primary font-semibold">
+                  {users.length} {users.length === 1 ? "Player" : "Players"}
+                </span>
+              </div>
+            </div>
+
+            {users.length === 0 ? (
+              <div className="text-center py-8 text-text-muted">
+                <FontAwesomeIcon
+                  icon={faUsers}
+                  className="text-4xl mb-3 opacity-50"
+                />
+                <p>
+                  No players joined yet. Share the room code to invite others.
+                </p>
               </div>
             ) : (
-              ""
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {users.map((userItem) => (
+                  <div
+                    key={userItem.user}
+                    className="flex items-center gap-3 p-4 bg-background-tertiary/50 border border-white/10 rounded-xl hover:border-primary/50 transition-all duration-300"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                      <FontAwesomeIcon
+                        icon={faUser}
+                        className="text-white text-sm"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-text-primary font-semibold">
+                        {userItem.user}
+                      </p>
+                      {userItem.user === user.username && (
+                        <p className="text-xs text-primary">You</p>
+                      )}
+                    </div>
+                    {main && userItem.user === user.username && (
+                      <span className="px-2 py-1 text-xs bg-primary/20 text-primary rounded-full border border-primary/50">
+                        Host
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {users.length < 2 && (
+              <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                <p className="text-sm text-yellow-400">
+                  <span className="font-semibold">Note:</span> At least 2
+                  players are required to start the auction. Currently{" "}
+                  {users.length}{" "}
+                  {users.length === 1 ? "player has" : "players have"} joined.
+                </p>
+              </div>
             )}
           </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            {main && (
+              <button
+                onClick={start}
+                disabled={users.length < 2}
+                className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${
+                  users.length < 2
+                    ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-primary via-secondary to-accent text-white hover:shadow-lg hover:scale-105 transform"
+                }`}
+              >
+                <FontAwesomeIcon icon={faPlay} />
+                Start Auction
+              </button>
+            )}
+            <button
+              onClick={exit}
+              className="w-full sm:w-auto px-8 py-3 rounded-xl font-semibold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 bg-background-tertiary/50 border border-white/20 text-text-primary hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400"
+            >
+              <FontAwesomeIcon icon={faSignOutAlt} />
+              Exit Lobby
+            </button>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mt-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl backdrop-blur-sm">
+              <p className="text-center text-red-400 text-sm font-medium">
+                {error}
+              </p>
+            </div>
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -2,34 +2,59 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const Input = ({ type, placeholder, onChange, icon, error, title }) => {
   return (
-    <div className="py-6 relative">
-      <label htmlFor={type} className="inline-block text-base px-4 my-2">
-        {title}:{" "}
-      </label>
-      {icon ? (
-        <FontAwesomeIcon
-          icon={icon}
-          className="absolute top-[4.9rem] left-4 scale-75 z-[999]"
-        />
-      ) : (
-        ""
-      )}
-      <input
-        id={type}
-        className="glassmorphism py-1 w-full min-h-12 no-underline rounded-[35px] border-none outline-none pl-12 tracking-wide text-base text-font-main focus:border-2 focus:border-whitesmoke [&:-webkit-autofill]:shadow-[0_0_0_30px_hsla(267,15%,12%,0.247)_inset] [&:-webkit-autofill:hover]:shadow-[0_0_0_30px_hsla(267,15%,12%,0.247)_inset] [&:-webkit-autofill:focus]:shadow-[0_0_0_30px_hsla(267,15%,12%,0.247)_inset] [&:-webkit-autofill:active]:shadow-[0_0_0_30px_hsla(267,15%,12%,0.247)_inset]"
-        placeholder={placeholder}
-        type={type}
-        onChange={(event) => onChange(event.target.value)}
-      ></input>
-      <p
-        className={
-          error === ""
-            ? "hidden"
-            : "text-center block bg-red-500/10 text-base mt-3 p-2 rounded-2xl max-w-[22rem]"
-        }
+    <div className="relative mb-6">
+      {/* Modern label styling */}
+      <label
+        htmlFor={type}
+        className="block text-sm font-semibold text-text-secondary mb-2 px-1 tracking-wide uppercase"
       >
-        {error}
-      </p>
+        {title}
+      </label>
+
+      {/* Input container with icon */}
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
+            <FontAwesomeIcon icon={icon} className="text-text-muted text-lg" />
+          </div>
+        )}
+
+        <input
+          id={type}
+          className={`
+            w-full px-4 py-3.5 rounded-xl
+            bg-background-tertiary/50 border border-white/10
+            text-text-primary text-base
+            placeholder:text-text-muted/60
+            transition-all duration-300
+            focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50
+            hover:border-white/20
+            ${icon ? "pl-12" : "pl-4"}
+            ${
+              error
+                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/50"
+                : ""
+            }
+            [&:-webkit-autofill]:!bg-background-tertiary/50
+            [&:-webkit-autofill]:!text-text-primary
+            [&:-webkit-autofill]:!border-primary/50
+            [&:-webkit-autofill]:shadow-[0_0_0_30px_rgba(30,41,59,0.5)_inset]
+          `}
+          placeholder={placeholder}
+          type={type}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </div>
+
+      {/* Error message with modern styling */}
+      {error && (
+        <div className="mt-2 px-2">
+          <p className="text-sm text-red-400 font-medium flex items-center gap-1">
+            <span>⚠</span>
+            <span>{error}</span>
+          </p>
+        </div>
+      )}
     </div>
   );
 };

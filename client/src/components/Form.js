@@ -22,39 +22,73 @@ const Form = ({
   loading,
 }) => {
   return (
-    <div className="glassmorphism min-h-screen flex items-center justify-center text-2xl">
-      <div className="glassmorphism border-t border-white/50 border-r-0 max-w-[25rem] h-auto px-12 py-8 rounded-[20px]">
-        <h3 className="text-center">{title}</h3>
-        <form id="form" onSubmit={onFormSubmit} noValidate>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden">
+      {/* Static background with subtle pattern */}
+      <div className="absolute inset-0 bg-background-secondary">
+        {/* Subtle grid pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: "50px 50px",
+          }}
+        ></div>
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/50 via-background-secondary to-slate-800/50"></div>
+      </div>
+
+      <div className="relative z-10 glassmorphism max-w-xl w-full px-10 py-12 rounded-2xl shadow-2xl border border-white/20 backdrop-blur-xl">
+        {/* Modern heading with gradient */}
+        <div className="text-center mb-8">
+          <h3 className="text-4xl md:text-5xl font-bold mb-2">
+            <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+              {title}
+            </span>
+          </h3>
+          <div className="h-1 w-20 bg-gradient-to-r from-primary via-secondary to-accent mx-auto rounded-full mt-3"></div>
+        </div>
+
+        <form
+          id="form"
+          onSubmit={onFormSubmit}
+          noValidate
+          className="space-y-6"
+        >
           {data.map((inputFields, index) => {
             return <Input key={index} {...inputFields} />;
           })}
+
           {!loading ? (
-            <div className="center">
-              {" "}
+            <div className="center mt-8">
               <button
                 type="submit"
-                className="relative inline-block px-5 py-2 rounded-[30px] transition-transform duration-500 uppercase font-bold overflow-hidden border-none outline-none bg-theme-3 z-10 cursor-pointer before:z-[-1] before:content-[''] before:h-[200%] before:w-[200%] before:absolute before:top-full before:left-[-50%] before:right-0 before:bottom-0 before:rounded-full before:bg-theme before:transition-transform before:duration-500 hover:before:translate-y-[-2.7rem]"
+                className="relative inline-block px-8 py-3 rounded-xl transition-all duration-300 uppercase font-bold overflow-hidden border-none outline-none bg-gradient-to-r from-primary via-secondary to-accent text-white z-10 cursor-pointer shadow-lg hover:shadow-xl hover:scale-105 transform"
               >
-                {title}
-              </button>{" "}
+                <span className="relative z-10">{title}</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-dark via-secondary to-accent-hover opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              </button>
             </div>
           ) : (
-            <Loader size="2" />
+            <div className="center mt-8">
+              <Loader size="2" />
+            </div>
           )}
         </form>
-        <p
-          className={
-            error === ""
-              ? "hidden"
-              : "text-center block bg-red-500/10 text-base mt-3 p-2 rounded-2xl max-w-[22rem]"
-          }
-        >
-          {error}
-        </p>
-        <div className="flex justify-center items-center flex-col mt-4">
-          {message()}
-        </div>
+
+        {/* Error message with modern styling */}
+        {error && (
+          <div className="mt-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl backdrop-blur-sm">
+            <p className="text-center text-red-400 text-sm font-medium">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Message section */}
+        <div className="mt-6">{message()}</div>
       </div>
     </div>
   );
