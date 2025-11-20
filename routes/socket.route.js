@@ -1,6 +1,7 @@
 const {
   create,
   join,
+  viewAuction,
   start,
   play,
   bid,
@@ -8,6 +9,7 @@ const {
   checkUser,
   serverUsers,
   exitUser,
+  sendPlayersPreview,
 } = require("../controller/game");
 
 const socketRouter = (io) => {
@@ -22,6 +24,10 @@ const socketRouter = (io) => {
 
     socket.on("joinAuction", (data) => {
       join(io, socket, data);
+    });
+
+    socket.on("viewAuction", (data) => {
+      viewAuction(io, socket, data);
     });
 
     socket.on("requestPlay", (data) => {
@@ -46,6 +52,10 @@ const socketRouter = (io) => {
 
     socket.on("exit", (data) => {
       exitUser(io, data);
+    });
+
+    socket.on("request-players-preview", ({ room }) => {
+      sendPlayersPreview(socket, room);
     });
   });
 };

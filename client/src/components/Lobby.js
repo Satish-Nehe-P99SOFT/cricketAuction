@@ -41,9 +41,6 @@ const Lobby = ({
     socket.emit("requestPlay", {
       room: code,
     });
-    socket.emit("start", {
-      room: code,
-    });
   };
 
   const exit = () => {

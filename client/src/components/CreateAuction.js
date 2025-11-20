@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faUsers, faGavel } from "@fortawesome/free-solid-svg-icons";
@@ -7,22 +8,50 @@ const CreateAuction = ({
   user,
   setCreated,
   setJoin,
+  setView,
   setRoom,
   setMain,
 }) => {
+  const [error, setError] = useState("");
+  const history = useHistory();
+
+  useEffect(() => {
+    socket.on("create-success", (data) => {
+      setCreated(true);
+      setRoom(data.room);
+      setMain(true);
+      setError("");
+    });
+
+    socket.on("create-error", (data) => {
+      setError(data.message);
+    });
+
+    return () => {
+      socket.off("create-success");
+      socket.off("create-error");
+    };
+  }, [socket, setCreated, setRoom, setMain]);
+
   const newAuction = () => {
+    setError("");
     const room = uuidv4();
     socket.emit("createAuction", {
       username: user.username,
       room,
     });
-    setCreated(true);
-    setRoom(room);
-    setMain(true);
+  };
+
+  const goToPlayers = () => {
+    history.push("/players");
   };
 
   const joinAuction = () => {
     setJoin(true);
+  };
+
+  const viewAuction = () => {
+    setView(true);
   };
 
   return (
