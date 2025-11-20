@@ -4,16 +4,18 @@ const dbUser = require("../database/models/user.model");
 class Auction {
   constructor(room) {
     this.users = [];
+    this.viewers = [];
     this.currentBidder = "";
     this.currentBid = 0;
     this.currentPlayer = "";
     this.timer = 10;
     this.interval = null;
     this.room = room;
-    this.squad = 0;
     this.player = 0;
     this.confirm = 0;
     this.started = false;
+    this.players = []; // Array of all players from creator
+    this.creator = ""; // Username of the auction creator
   }
 
   startAuction() {
@@ -28,7 +30,18 @@ class Auction {
     if (this.currentBidder === bidder) {
       return;
     }
+    // Check if user is a viewer
+    if (this.isViewer(bidder)) {
+      return socket.emit("bid-error", {
+        message: "Viewers cannot bid. You are in view-only mode.",
+      });
+    }
     const user = this.findUser(bidder);
+    if (!user) {
+      return socket.emit("bid-error", {
+        message: "You are not a participant in this auction.",
+      });
+    }
 
     if (this.currentBid >= 5) {
       if (user.budget <= this.currentBid + 1) {
@@ -56,12 +69,23 @@ class Auction {
     return currentUser;
   }
 
-  servePlayer(squads) {
-    const player = squads[this.squad].players[this.player];
+  servePlayer() {
+    if (this.player >= this.players.length) {
+      return;
+    }
+    const player = this.players[this.player];
     this.currentPlayer = player;
     this.room.emit("player", {
       player,
     });
+  }
+
+  setPlayers(players) {
+    this.players = players;
+  }
+
+  getPlayersPreview() {
+    return this.players;
   }
 
   getCurrentPlayer() {
@@ -120,28 +144,24 @@ class Auction {
     this.timer--;
   }
 
-  gameOver(squads, liveAuctions, room) {
+  gameOver(liveAuctions, room) {
     this.player++;
-    if (squads[this.squad].players.length === this.player) {
-      this.player = 0;
-      this.squad++;
-      if (squads.length === this.squad) {
-        const auction = this;
-        this.room.emit("game-over");
-        this.users.forEach((u) => {
-          dbUser.findOneAndUpdate(
-            { username: u.user },
-            { $push: { auctions: { auction: auction.users } } },
-            (error, success) => {
-              if (error) {
-                console.log(error);
-              }
+    if (this.player >= this.players.length) {
+      const auction = this;
+      this.room.emit("game-over");
+      this.users.forEach((u) => {
+        dbUser.findOneAndUpdate(
+          { username: u.user },
+          { $push: { auctions: { auction: auction.users } } },
+          (error, success) => {
+            if (error) {
+              console.log(error);
             }
-          );
-        });
-        liveAuctions.delete(room);
-        return true;
-      }
+          }
+        );
+      });
+      liveAuctions.delete(room);
+      return true;
     }
     return false;
   }
@@ -150,8 +170,16 @@ class Auction {
     if (!this.dupUser(user)) this.users.push(new User(user));
   }
 
+  addViewer(viewer) {
+    if (!this.dupViewer(viewer)) this.viewers.push(viewer);
+  }
+
   removeUser(user) {
     this.users = this.users.filter((u) => user !== u.user);
+  }
+
+  removeViewer(viewer) {
+    this.viewers = this.viewers.filter((v) => viewer !== v);
   }
 
   dupUser(user) {
@@ -162,14 +190,30 @@ class Auction {
     return true;
   }
 
-  next(squads, liveAuctions, room) {
+  dupViewer(viewer) {
+    return this.viewers.includes(viewer);
+  }
+
+  isViewer(username) {
+    return this.viewers.includes(username);
+  }
+
+  isParticipant(username) {
+    return this.findUser(username) !== undefined;
+  }
+
+  next(liveAuctions, room, username) {
+    // Only participants can confirm next
+    if (!this.isParticipant(username)) {
+      return;
+    }
     this.confirm++;
     if (this.confirm >= this.users.length) {
-      if (!this.gameOver(squads, liveAuctions, room)) {
+      if (!this.gameOver(liveAuctions, room)) {
         this.resetTimer();
         this.resetBid();
         this.startInterval();
-        this.servePlayer(squads);
+        this.servePlayer();
       }
     }
   }

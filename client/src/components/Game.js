@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PlayerCard from "./PlayerCard";
 import UserAccordian from "./UserAccordian";
 import { useHistory } from "react-router-dom";
-const Game = ({ users, socket, room, user, initial }) => {
+const Game = ({ users, socket, room, user, initial, isViewer = false }) => {
   const [timer, setTimer] = useState(-1);
   const [bidder, setBidder] = useState("");
   const [amount, setAmount] = useState(0);
@@ -109,28 +109,39 @@ const Game = ({ users, socket, room, user, initial }) => {
                 );
               })}
             </div>
-            <div className="flex gap-8">
-              <button
-                onClick={() => {
-                  bid();
-                }}
-                className="relative inline-block px-5 py-2 rounded-[30px] transition-transform duration-500 uppercase font-bold overflow-hidden border-none outline-none bg-theme-3 z-10 cursor-pointer before:z-[-1] before:content-[''] before:h-[200%] before:w-[200%] before:absolute before:top-full before:left-[-50%] before:right-0 before:bottom-0 before:rounded-full before:bg-theme before:transition-transform before:duration-500 hover:before:translate-y-[-2.7rem]"
-              >
-                Bid
-              </button>
-              {displayNext ? (
+            {!isViewer ? (
+              <div className="flex gap-8">
                 <button
                   onClick={() => {
-                    next();
+                    bid();
                   }}
                   className="relative inline-block px-5 py-2 rounded-[30px] transition-transform duration-500 uppercase font-bold overflow-hidden border-none outline-none bg-theme-3 z-10 cursor-pointer before:z-[-1] before:content-[''] before:h-[200%] before:w-[200%] before:absolute before:top-full before:left-[-50%] before:right-0 before:bottom-0 before:rounded-full before:bg-theme before:transition-transform before:duration-500 hover:before:translate-y-[-2.7rem]"
                 >
-                  Next
+                  Bid
                 </button>
-              ) : (
-                ""
-              )}
-            </div>
+                {displayNext ? (
+                  <button
+                    onClick={() => {
+                      next();
+                    }}
+                    className="relative inline-block px-5 py-2 rounded-[30px] transition-transform duration-500 uppercase font-bold overflow-hidden border-none outline-none bg-theme-3 z-10 cursor-pointer before:z-[-1] before:content-[''] before:h-[200%] before:w-[200%] before:absolute before:top-full before:left-[-50%] before:right-0 before:bottom-0 before:rounded-full before:bg-theme before:transition-transform before:duration-500 hover:before:translate-y-[-2.7rem]"
+                  >
+                    Next
+                  </button>
+                ) : (
+                  ""
+                )}
+              </div>
+            ) : (
+              <div className="flex gap-8 items-center">
+                <div className="px-5 py-2 rounded-[30px] uppercase font-bold bg-gray-600/50 text-gray-400 cursor-not-allowed">
+                  View Only Mode
+                </div>
+                <p className="text-sm text-gray-400 italic">
+                  You can only view the auction. Bidding is disabled.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
