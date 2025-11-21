@@ -17,17 +17,39 @@ const Game = ({ users, socket, room, user, initial }) => {
   const [bidder, setBidder] = useState("");
   const [amount, setAmount] = useState(0);
   const [error, setError] = useState(0);
-  const [player, setPlayer] = useState(initial);
+  const [player, setPlayer] = useState(initial || null);
   const [displayNext, setNext] = useState(false);
   let history = useHistory();
 
+  // Update player when initial prop changes
   useEffect(() => {
-    socket.emit("fetch-details");
-    socket.on("server-details", (data) => {
-      setBidder(data.bidder);
-      setAmount(data.amount);
+    if (initial) {
+      setPlayer(initial);
+    }
+  }, [initial]);
+
+  useEffect(() => {
+    // Request current player and bid details when component mounts
+    socket.emit("fetch-details", {
+      room,
+      user: user?.username,
     });
-  }, [socket]);
+
+    const handleServerDetails = (data) => {
+      setBidder(data.bidder || "");
+      setAmount(data.amount || 0);
+      // If we receive a player, update it (this ensures we get the current player even if initial prop was empty)
+      if (data.player) {
+        setPlayer(data.player);
+      }
+    };
+
+    socket.on("server-details", handleServerDetails);
+
+    return () => {
+      socket.off("server-details", handleServerDetails);
+    };
+  }, [socket, room, user]);
 
   useEffect(() => {
     socket.on("display", (data) => {
@@ -50,6 +72,14 @@ const Game = ({ users, socket, room, user, initial }) => {
     socket.on("game-over", () => {
       history.push("/auctions/played");
     });
+
+    return () => {
+      socket.off("display");
+      socket.off("bid");
+      socket.off("bid-error");
+      socket.off("player");
+      socket.off("game-over");
+    };
   }, [socket, history]);
 
   useEffect(() => {

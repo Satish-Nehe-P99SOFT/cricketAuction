@@ -10,6 +10,7 @@ const {
   serverUsers,
   exitUser,
   sendPlayersPreview,
+  fetchDetails,
 } = require("../controller/game");
 
 const socketRouter = (io) => {
@@ -56,6 +57,10 @@ const socketRouter = (io) => {
 
     socket.on("request-players-preview", ({ room }) => {
       sendPlayersPreview(socket, room);
+    });
+
+    socket.on("fetch-details", (data) => {
+      fetchDetails(socket, data);
     });
   });
 };

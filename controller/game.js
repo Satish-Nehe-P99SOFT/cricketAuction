@@ -325,6 +325,61 @@ const exitUser = (io, data) => {
   }
 };
 
+const fetchDetails = (socket, data) => {
+  let room = null;
+
+  // First, try to get room from data if provided
+  if (data && data.room) {
+    room = data.room;
+  }
+
+  // If room not found, try to get it from socket rooms
+  if (!room && socket.rooms) {
+    for (let roomKey of socket.rooms) {
+      if (liveAuctions.has(roomKey) && roomKey !== socket.id) {
+        room = roomKey;
+        break;
+      }
+    }
+  }
+
+  // If still not found, try to find by user
+  if (!room && data?.user) {
+    for (let [roomKey, auction] of liveAuctions) {
+      if (auction.isParticipant(data.user) || auction.isViewer(data.user)) {
+        room = roomKey;
+        break;
+      }
+    }
+  }
+
+  if (!room) {
+    return socket.emit("server-details", {
+      bidder: "",
+      amount: 0,
+      player: null,
+    });
+  }
+
+  const auction = liveAuctions.get(room);
+  if (!auction) {
+    return socket.emit("server-details", {
+      bidder: "",
+      amount: 0,
+      player: null,
+    });
+  }
+
+  const currentBid = auction.getCurrentBid();
+  const currentPlayer = auction.getCurrentPlayer();
+
+  socket.emit("server-details", {
+    bidder: currentBid.bidder || "",
+    amount: currentBid.bid || 0,
+    player: currentPlayer || null,
+  });
+};
+
 module.exports = {
   create,
   join,
@@ -337,4 +392,5 @@ module.exports = {
   serverUsers,
   exitUser,
   sendPlayersPreview,
+  fetchDetails,
 };
