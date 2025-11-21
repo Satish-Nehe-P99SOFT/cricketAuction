@@ -11,7 +11,7 @@ import Loader from "./Loading";
 
 import io from "socket.io-client";
 
-const url = "http://localhost:8080/";
+const url = "https://cricketauction-production-8eae.up.railway.app/";
 
 const Auction = () => {
   const { user } = useContext(UserContext);
