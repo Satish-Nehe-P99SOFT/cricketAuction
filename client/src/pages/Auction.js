@@ -4,7 +4,6 @@ import { UserContext } from "../hooks/UserContext";
 
 // Components
 import JoinAuction from "../components/JoinAuction";
-import ViewAuction from "../components/ViewAuction";
 import CreateAuction from "../components/CreateAuction";
 import Game from "../components/Game";
 import Lobby from "../components/Lobby";
@@ -16,7 +15,7 @@ const url = import.meta.env.PROD
   ? "https://ipl-mega-auction.herokuapp.com/"
   : "http://localhost:8080/";
 
-const Auction = (props) => {
+const Auction = () => {
   const { user } = useContext(UserContext);
   const [socket] = useState(io(url));
   const [room, setRoom] = useState("");

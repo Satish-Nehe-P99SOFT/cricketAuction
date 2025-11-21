@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import PlayerCard from "./PlayerCard";
-import UserAccordian from "./UserAccordian";
 import { useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,6 +8,8 @@ import {
   faCoins,
   faClock,
   faArrowRight,
+  faUsers,
+  faCrown,
 } from "@fortawesome/free-solid-svg-icons";
 
 const Game = ({ users, socket, room, user, initial }) => {
@@ -246,16 +247,244 @@ const Game = ({ users, socket, room, user, initial }) => {
 
         {/* Teams Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-text-primary mb-6 text-center">
+          <h2 className="text-3xl font-bold text-text-primary mb-8 text-center">
             <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               Team Rosters
             </span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {users.map((userItem) => {
+              const totalPlayers =
+                (userItem.batsmen?.length || 0) +
+                (userItem.wicketKeepers?.length || 0) +
+                (userItem.allRounders?.length || 0) +
+                (userItem.bowlers?.length || 0) +
+                (userItem.unknown?.length || 0);
+
               return (
-                <div key={userItem.user} className="glassmorphism rounded-xl">
-                  <UserAccordian {...userItem} />
+                <div
+                  key={userItem.user}
+                  className="glassmorphism p-6 rounded-2xl border border-white/20 backdrop-blur-xl hover:border-primary/50 transition-all duration-300 hover:shadow-2xl"
+                >
+                  {/* Team Header */}
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                        <span className="text-white text-lg font-bold">
+                          {userItem.user.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-text-primary">
+                          {userItem.user}
+                        </h3>
+                        <p className="text-xs text-text-muted">Team Manager</p>
+                      </div>
+                    </div>
+                    {userItem.user === user.username && (
+                      <div className="px-2 py-1 bg-yellow-500/20 border border-yellow-500/50 rounded-full">
+                        <FontAwesomeIcon
+                          icon={faCrown}
+                          className="text-yellow-400 text-xs"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Budget and Stats */}
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="p-3 bg-background-tertiary/50 rounded-xl border border-white/10">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FontAwesomeIcon
+                          icon={faCoins}
+                          className="text-red-400 text-sm"
+                        />
+                        <p className="text-xs text-text-muted uppercase tracking-wide">
+                          Budget
+                        </p>
+                      </div>
+                      <p className="text-lg font-bold text-red-400">
+                        {userItem.budget || 0}cr
+                      </p>
+                    </div>
+                    <div className="p-3 bg-background-tertiary/50 rounded-xl border border-white/10">
+                      <div className="flex items-center gap-2 mb-1">
+                        <FontAwesomeIcon
+                          icon={faUsers}
+                          className="text-primary text-sm"
+                        />
+                        <p className="text-xs text-text-muted uppercase tracking-wide">
+                          Players
+                        </p>
+                      </div>
+                      <p className="text-lg font-bold text-primary">
+                        {totalPlayers}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Team Composition */}
+                  <div className="space-y-3">
+                    {userItem.batsmen?.length > 0 && (
+                      <div className="p-3 bg-background-tertiary/30 rounded-lg border border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">
+                                B
+                              </span>
+                            </div>
+                            <span className="text-sm font-semibold text-text-primary">
+                              Batsmen
+                            </span>
+                          </div>
+                          <span className="text-xs text-text-muted bg-white/5 px-2 py-1 rounded-full">
+                            {userItem.batsmen.length}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {userItem.batsmen.map((player, idx) => (
+                            <span
+                              key={idx}
+                              className="text-xs text-text-secondary bg-background-secondary/50 px-2 py-1 rounded"
+                            >
+                              {player.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {userItem.wicketKeepers?.length > 0 && (
+                      <div className="p-3 bg-background-tertiary/30 rounded-lg border border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">
+                                WK
+                              </span>
+                            </div>
+                            <span className="text-sm font-semibold text-text-primary">
+                              Wicket Keepers
+                            </span>
+                          </div>
+                          <span className="text-xs text-text-muted bg-white/5 px-2 py-1 rounded-full">
+                            {userItem.wicketKeepers.length}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {userItem.wicketKeepers.map((player, idx) => (
+                            <span
+                              key={idx}
+                              className="text-xs text-text-secondary bg-background-secondary/50 px-2 py-1 rounded"
+                            >
+                              {player.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {userItem.allRounders?.length > 0 && (
+                      <div className="p-3 bg-background-tertiary/30 rounded-lg border border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">
+                                AR
+                              </span>
+                            </div>
+                            <span className="text-sm font-semibold text-text-primary">
+                              All Rounders
+                            </span>
+                          </div>
+                          <span className="text-xs text-text-muted bg-white/5 px-2 py-1 rounded-full">
+                            {userItem.allRounders.length}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {userItem.allRounders.map((player, idx) => (
+                            <span
+                              key={idx}
+                              className="text-xs text-text-secondary bg-background-secondary/50 px-2 py-1 rounded"
+                            >
+                              {player.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {userItem.bowlers?.length > 0 && (
+                      <div className="p-3 bg-background-tertiary/30 rounded-lg border border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">
+                                BWL
+                              </span>
+                            </div>
+                            <span className="text-sm font-semibold text-text-primary">
+                              Bowlers
+                            </span>
+                          </div>
+                          <span className="text-xs text-text-muted bg-white/5 px-2 py-1 rounded-full">
+                            {userItem.bowlers.length}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {userItem.bowlers.map((player, idx) => (
+                            <span
+                              key={idx}
+                              className="text-xs text-text-secondary bg-background-secondary/50 px-2 py-1 rounded"
+                            >
+                              {player.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {userItem.unknown?.length > 0 && (
+                      <div className="p-3 bg-background-tertiary/30 rounded-lg border border-white/5">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">
+                                ?
+                              </span>
+                            </div>
+                            <span className="text-sm font-semibold text-text-primary">
+                              Unknown
+                            </span>
+                          </div>
+                          <span className="text-xs text-text-muted bg-white/5 px-2 py-1 rounded-full">
+                            {userItem.unknown.length}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {userItem.unknown.map((player, idx) => (
+                            <span
+                              key={idx}
+                              className="text-xs text-text-secondary bg-background-secondary/50 px-2 py-1 rounded"
+                            >
+                              {player.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {totalPlayers === 0 && (
+                      <div className="text-center py-8 text-text-muted">
+                        <FontAwesomeIcon
+                          icon={faUsers}
+                          className="text-4xl mb-3 opacity-30"
+                        />
+                        <p className="text-sm">No players yet</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}
