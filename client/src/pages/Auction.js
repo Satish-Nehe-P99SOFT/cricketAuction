@@ -12,9 +12,9 @@ import Loader from "./Loading";
 
 import io from "socket.io-client";
 
-const url = import.meta.env.PROD
-  ? "https://ipl-mega-auction.herokuapp.com/"
-  : "http://localhost:8080/";
+const url =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? window.location.origin : "http://localhost:8080");
 
 const Auction = (props) => {
   const { user } = useContext(UserContext);
