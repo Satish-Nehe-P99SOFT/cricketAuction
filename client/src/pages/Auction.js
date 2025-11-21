@@ -11,9 +11,9 @@ import Loader from "./Loading";
 
 import io from "socket.io-client";
 
-const url = import.meta.env.PROD
-  ? "https://ipl-mega-auction.herokuapp.com/"
-  : "http://localhost:8080/";
+const url =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? window.location.origin : "http://localhost:8080");
 
 const Auction = () => {
   const { user } = useContext(UserContext);
@@ -51,9 +51,19 @@ const Auction = () => {
       setIsViewer(data.isViewer || false);
       if (data.started) {
         setPlay(true);
+        setView(false);
+        setCreated(false);
       } else {
-        setCreated(true);
-        setMain(data.starter);
+        if (data.isViewer) {
+          // If viewing, show view mode lobby
+          setView(true);
+          setCreated(true);
+          setMain(false);
+        } else {
+          setCreated(true);
+          setMain(data.starter || false);
+          setView(false);
+        }
       }
     });
 
@@ -136,7 +146,17 @@ const Auction = () => {
           setCreated={setCreated}
           setJoin={setJoin}
         />
-      ) : view ? (
+      ) : view && !created ? (
+        <ViewAuction
+          socket={socket}
+          user={user}
+          room={room}
+          setRoom={setRoom}
+          errors={errors}
+          loading={loading}
+          setLoading={setLoading}
+        />
+      ) : view && created ? (
         <div className="glassmorphism min-h-screen flex items-center justify-center text-xl">
           <div className="mx-auto py-4 px-1 w-[45rem] h-auto rounded-md glassmorphism border-none bg-background-tertiary">
             <div className="p-1 text-center tracking-[1.5px] m-4 flex flex-col">
