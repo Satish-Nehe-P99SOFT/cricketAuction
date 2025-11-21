@@ -1,8 +1,6 @@
 import axios from "axios";
 
-const url =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? window.location.origin : "http://localhost:8080");
+const url = "https://cricketauction-production-8eae.up.railway.app";
 
 const axiosInstance = axios.create({
   withCredentials: true,

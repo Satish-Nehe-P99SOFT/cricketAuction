@@ -35,7 +35,7 @@ export default defineConfig({
     open: true,
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: "cricketauction-production-8eae.up.railway.app",
         changeOrigin: true,
         secure: false,
       },
