@@ -2,6 +2,7 @@ import { Switch, Route } from "react-router-dom";
 
 // Pages
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
@@ -23,9 +24,9 @@ function App() {
 
   return (
     <UserContext.Provider value={{ user, setUser, loading }}>
-      <div className="App">
+      <div className="App flex flex-col min-h-screen">
         <Navbar />
-        <div className="pt-16 md:pt-20">
+        <main className="flex-grow pt-16 md:pt-20">
           <Switch>
             <Route exact path="/" render={(props) => <Home {...props} />} />
             <PublicRoute exact path="/login" component={Login} />
@@ -43,7 +44,8 @@ function App() {
               component={PreviousAuctions}
             />
           </Switch>
-        </div>
+        </main>
+        <Footer />
       </div>
     </UserContext.Provider>
   );
