@@ -32,12 +32,15 @@ const ViewAuction = ({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (!room || room.trim() === "") {
+      return;
+    }
     setLoading(true);
     socket.emit("viewAuction", {
       username: user.username,
-      room,
+      room: room.trim(),
     });
-    setLoading(false);
+    // Don't set loading to false here - let the socket response handle it
   };
 
   return (

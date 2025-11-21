@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faUsers, faGavel } from "@fortawesome/free-solid-svg-icons";
-
+import {
+  faPlus,
+  faUsers,
+  faGavel,
+  faEye,
+} from "@fortawesome/free-solid-svg-icons";
 const CreateAuction = ({
   socket,
   user,
@@ -12,19 +16,16 @@ const CreateAuction = ({
   setRoom,
   setMain,
 }) => {
-  const [error, setError] = useState("");
-  const history = useHistory();
-
   useEffect(() => {
     socket.on("create-success", (data) => {
       setCreated(true);
       setRoom(data.room);
       setMain(true);
-      setError("");
     });
 
     socket.on("create-error", (data) => {
-      setError(data.message);
+      // Error handling can be added here if needed
+      console.error("Create auction error:", data.message);
     });
 
     return () => {
@@ -34,16 +35,11 @@ const CreateAuction = ({
   }, [socket, setCreated, setRoom, setMain]);
 
   const newAuction = () => {
-    setError("");
     const room = uuidv4();
     socket.emit("createAuction", {
       username: user.username,
       room,
     });
-  };
-
-  const goToPlayers = () => {
-    history.push("/players");
   };
 
   const joinAuction = () => {
@@ -95,7 +91,7 @@ const CreateAuction = ({
         </div>
 
         {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Create Auction Card */}
           <div className="glassmorphism p-8 rounded-2xl border border-white/20 backdrop-blur-xl hover:border-primary/50 transition-all duration-300 hover:shadow-2xl hover:scale-105 transform">
             <div className="flex flex-col items-center text-center">
@@ -144,6 +140,29 @@ const CreateAuction = ({
                 className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-secondary via-purple-600 to-accent text-white font-semibold uppercase tracking-wide transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
               >
                 Join Existing Room
+              </button>
+            </div>
+          </div>
+
+          {/* View Auction Card */}
+          <div className="glassmorphism p-8 rounded-2xl border border-white/20 backdrop-blur-xl hover:border-accent/50 transition-all duration-300 hover:shadow-2xl hover:scale-105 transform">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent to-teal-600 flex items-center justify-center mb-6 shadow-lg">
+                <FontAwesomeIcon icon={faEye} className="text-3xl text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-text-primary mb-3">
+                View Auction
+              </h2>
+              <p className="text-text-secondary text-sm md:text-base mb-6 leading-relaxed">
+                Watch an ongoing auction in view-only mode. Enter a room code to
+                observe the bidding action without participating. Perfect for
+                spectators and learning.
+              </p>
+              <button
+                onClick={viewAuction}
+                className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-accent via-teal-600 to-primary text-white font-semibold uppercase tracking-wide transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+              >
+                View Auction Room
               </button>
             </div>
           </div>
