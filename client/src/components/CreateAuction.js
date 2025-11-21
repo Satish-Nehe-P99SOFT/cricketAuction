@@ -1,12 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
   faUsers,
   faGavel,
   faEye,
+  faExclamationTriangle,
+  faTimes,
+  faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
+import { getPlayerCount } from "../services/player.service";
+
 const CreateAuction = ({
   socket,
   user,
@@ -16,6 +22,11 @@ const CreateAuction = ({
   setRoom,
   setMain,
 }) => {
+  const [showNoPlayersModal, setShowNoPlayersModal] = useState(false);
+  const [playerCount, setPlayerCount] = useState(0);
+  const [checkingPlayers, setCheckingPlayers] = useState(false);
+  const history = useHistory();
+
   useEffect(() => {
     socket.on("create-success", (data) => {
       setCreated(true);
@@ -34,12 +45,49 @@ const CreateAuction = ({
     };
   }, [socket, setCreated, setRoom, setMain]);
 
-  const newAuction = () => {
-    const room = uuidv4();
-    socket.emit("createAuction", {
-      username: user.username,
-      room,
-    });
+  useEffect(() => {
+    // Check player count when component mounts
+    checkPlayerCount();
+  }, []);
+
+  const checkPlayerCount = async () => {
+    try {
+      const response = await getPlayerCount();
+      if (response.success) {
+        setPlayerCount(response.count || 0);
+      }
+    } catch (error) {
+      console.error("Error checking player count:", error);
+    }
+  };
+
+  const newAuction = async () => {
+    setCheckingPlayers(true);
+    try {
+      const response = await getPlayerCount();
+      if (response.success && response.count > 0) {
+        // User has players, proceed with creating auction
+        const room = uuidv4();
+        socket.emit("createAuction", {
+          username: user.username,
+          room,
+        });
+      } else {
+        // No players found, show modal
+        setShowNoPlayersModal(true);
+      }
+    } catch (error) {
+      console.error("Error checking players:", error);
+      // On error, show modal to be safe
+      setShowNoPlayersModal(true);
+    } finally {
+      setCheckingPlayers(false);
+    }
+  };
+
+  const handleGoToPlayers = () => {
+    setShowNoPlayersModal(false);
+    history.push("/players");
   };
 
   const joinAuction = () => {
@@ -123,9 +171,10 @@ const CreateAuction = ({
               {/* Button */}
               <button
                 onClick={newAuction}
-                className="w-full px-6 py-4 rounded-xl bg-gradient-to-r from-primary via-blue-600 to-primary-dark text-white font-semibold uppercase tracking-wide transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transform active:scale-95"
+                disabled={checkingPlayers}
+                className="w-full px-6 py-4 rounded-xl bg-gradient-to-r from-primary via-blue-600 to-primary-dark text-white font-semibold uppercase tracking-wide transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                Create New Room
+                {checkingPlayers ? "Checking..." : "Create New Room"}
               </button>
             </div>
           </div>
@@ -203,6 +252,62 @@ const CreateAuction = ({
           </div>
         </div>
       </div>
+
+      {/* No Players Modal */}
+      {showNoPlayersModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/50 backdrop-blur-sm">
+          <div className="glassmorphism p-8 rounded-3xl border border-white/20 backdrop-blur-xl max-w-md w-full transform transition-all duration-300 animate-scale-in">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowNoPlayersModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-background-tertiary/50 hover:bg-background-tertiary border border-white/10 flex items-center justify-center transition-all duration-300 hover:scale-110"
+            >
+              <FontAwesomeIcon
+                icon={faTimes}
+                className="text-text-primary text-sm"
+              />
+            </button>
+
+            {/* Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 flex items-center justify-center">
+                <FontAwesomeIcon
+                  icon={faExclamationTriangle}
+                  className="text-yellow-400 text-4xl"
+                />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-2xl md:text-3xl font-bold text-center text-text-primary mb-4">
+              No Players Added
+            </h2>
+
+            {/* Message */}
+            <p className="text-text-secondary text-center mb-6 leading-relaxed">
+              You need to add at least one player before creating an auction.
+              Please go to the Players section and add players first.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleGoToPlayers}
+                className="w-full px-6 py-4 rounded-xl bg-gradient-to-r from-primary via-blue-600 to-primary-dark text-white font-semibold uppercase tracking-wide transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transform active:scale-95 flex items-center justify-center gap-2"
+              >
+                <span>Go to Players</span>
+                <FontAwesomeIcon icon={faArrowRight} className="text-sm" />
+              </button>
+              <button
+                onClick={() => setShowNoPlayersModal(false)}
+                className="w-full px-6 py-3 rounded-xl bg-background-tertiary border border-white/20 text-text-primary font-semibold uppercase tracking-wide transition-all duration-300 hover:bg-white/10 hover:border-white/30"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
