@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node app.js",
     "build": "npm install && npm run client-install && npm run build --prefix client",
-    "postinstall": "if [ \"$NODE_ENV\" = \"production\" ]; then npm run client-install && npm run build --prefix client; fi",
+    "postinstall": "npm run client-install || true",
     "client-install": "npm install --prefix client",
     "server": "nodemon app.js",
     "client": "npm run dev --prefix client",
