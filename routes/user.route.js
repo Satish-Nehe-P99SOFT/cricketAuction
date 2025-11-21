@@ -2,20 +2,18 @@ const express = require("express");
 const User = require("../database/models/user.model");
 const router = express.Router();
 const { auth } = require("../middleware/auth");
-
 // Sign up route, used for creating new accounts
 router.post("/signup", async (req, res) => {
   try {
     const user = new User({ ...req.body });
     const token = await user.generateAuthToken();
-
     // Creating a http only cookie, which is used for authorization
     res.cookie("jwt", token, {
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      secure: process.env.NODE_ENV === "production",
       path: "/",
       httpOnly: true,
     });
-
     res.status(201).send({
       success: true,
       message: "Successfully created an account",
@@ -35,27 +33,24 @@ router.post("/signup", async (req, res) => {
     } else {
       errorMessage = "Opps, something went wrong, try again.";
     }
-
     res.status(400).send({
       success: false,
       message: errorMessage,
     });
   }
 });
-
 // Login route used to login existing users
 router.post("/login", async (req, res) => {
   try {
     const user = await User.findByCredentials({ ...req.body });
     const token = await user.generateAuthToken();
-
     // Creating a http only cookie, which is used for authorization
     res.cookie("jwt", token, {
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      secure: process.env.NODE_ENV === "production",
       path: "/",
       httpOnly: true,
     });
-
     res.status(200).send({
       success: true,
       message: "Successfully logged in.",
@@ -68,7 +63,6 @@ router.post("/login", async (req, res) => {
     });
   }
 });
-
 // Authenticating the http only cookie
 router.get("/user", auth, async (req, res) => {
   const id = req.id;
@@ -86,15 +80,20 @@ router.get("/user", auth, async (req, res) => {
     });
   }
 });
-
 router.get("/logout", auth, async (req, res) => {
   await User.findByIdAndUpdate(req.id, {
     $pull: { tokens: { token: req.token } },
   });
-  res.clearCookie("jwt").send({
-    success: true,
-    message: "Successfully logged out",
-  });
+  res
+    .clearCookie("jwt", {
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      httpOnly: true,
+    })
+    .send({
+      success: true,
+      message: "Successfully logged out",
+    });
 });
-
 module.exports = router;
