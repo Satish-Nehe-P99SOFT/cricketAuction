@@ -25,19 +25,25 @@ function App() {
     <UserContext.Provider value={{ user, setUser, loading }}>
       <div className="App">
         <Navbar />
-        <Switch>
-          <Route exact path="/" render={(props) => <Home {...props} />} />
-          <PublicRoute exact path="/login" component={Login} />
-          <PublicRoute exact path="/signup" component={SignUp} />
-          <Route exact path="/about" render={(props) => <About {...props} />} />
-          <PrivateRoute exact path="/auction" component={Auction} />
-          <PrivateRoute exact path="/players" component={Players} />
-          <PrivateRoute
-            exact
-            path="/auctions/played"
-            component={PreviousAuctions}
-          />
-        </Switch>
+        <div className="pt-16 md:pt-20">
+          <Switch>
+            <Route exact path="/" render={(props) => <Home {...props} />} />
+            <PublicRoute exact path="/login" component={Login} />
+            <PublicRoute exact path="/signup" component={SignUp} />
+            <Route
+              exact
+              path="/about"
+              render={(props) => <About {...props} />}
+            />
+            <PrivateRoute exact path="/auction" component={Auction} />
+            <PrivateRoute exact path="/players" component={Players} />
+            <PrivateRoute
+              exact
+              path="/auctions/played"
+              component={PreviousAuctions}
+            />
+          </Switch>
+        </div>
       </div>
     </UserContext.Provider>
   );
