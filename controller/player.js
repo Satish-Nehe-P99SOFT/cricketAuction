@@ -43,6 +43,7 @@ const addPlayer = async (req, res) => {
     }
 
     // Check if player with same name already exists for this user
+    // Note: Different users can have players with the same name
     const existingPlayer = await Player.findOne({
       name: name.trim(),
       owner: req.id,
@@ -51,7 +52,7 @@ const addPlayer = async (req, res) => {
     if (existingPlayer) {
       return res.status(400).send({
         success: false,
-        message: "Player with this name already exists",
+        message: "You already have a player with this name",
       });
     }
 
@@ -72,7 +73,7 @@ const addPlayer = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).send({
         success: false,
-        message: "Player with this name already exists",
+        message: "You already have a player with this name",
       });
     }
     res.status(500).send({
@@ -98,7 +99,23 @@ const updatePlayer = async (req, res) => {
       });
     }
 
-    if (name) player.name = name.trim();
+    // If updating name, check for duplicate within current user's players
+    // Note: Different users can have players with the same name
+    if (name && name.trim() !== player.name) {
+      const existingPlayer = await Player.findOne({
+        name: name.trim(),
+        owner: req.id,
+        _id: { $ne: id }, // Exclude the current player being updated
+      });
+
+      if (existingPlayer) {
+        return res.status(400).send({
+          success: false,
+          message: "You already have a player with this name",
+        });
+      }
+      player.name = name.trim();
+    }
     if (role) {
       const validRoles = ["batter", "bowler", "allrounder", "wicketkeeper"];
       if (!validRoles.includes(role.toLowerCase())) {
@@ -119,6 +136,12 @@ const updatePlayer = async (req, res) => {
       player,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).send({
+        success: false,
+        message: "You already have a player with this name",
+      });
+    }
     res.status(500).send({
       success: false,
       message: "Error updating player",

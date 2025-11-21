@@ -9,6 +9,7 @@ const userRouter = require("./routes/user.route");
 const newsRouter = require("./routes/news.route");
 const auctionRouter = require("./routes/auction.route");
 const playerRouter = require("./routes/player.route");
+
 // const User = require("./database/models/user.model");
 const path = require("path");
 require("dotenv").config();
@@ -19,7 +20,7 @@ const server = http.createServer(app);
 
 const io = socketio(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: "https://crick-auction-front-end.vercel.app",
     credentials: true,
   },
 });
@@ -28,7 +29,7 @@ const io = socketio(server, {
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: "https://crick-auction-front-end.vercel.app",
     credentials: true,
   })
 );
@@ -41,6 +42,7 @@ app.use(express.json());
 app.use(userRouter);
 app.use(newsRouter);
 app.use(auctionRouter);
+
 app.use("/players", playerRouter);
 
 if (process.env.NODE_ENV === "production") {
