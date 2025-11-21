@@ -1,8 +1,6 @@
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faUsers, faGavel } from "@fortawesome/free-solid-svg-icons";
-import { useHistory } from "react-router-dom";
 import {
   faPlus,
   faUsers,
